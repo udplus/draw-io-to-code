@@ -30,6 +30,13 @@ describe("Import DrawIO Files", () => {
       await readFileAsync("test_fixtures/identityFunction.js")
     ).toString();
 
-    generateFunctionFromDiagram(fixtures.identityFunction);
+    const fileWritten = await generateFunctionFromDiagram(
+      fixtures.identityFunction
+    );
+
+    const writtenJSFile = await (
+      await readFileAsync("dist/identityFunction.js")
+    ).toString();
+    expect(writtenJSFile).to.equal(expectedJSFile);
   });
 });

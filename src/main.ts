@@ -1,3 +1,5 @@
+import { stringify } from "querystring";
+
 const fs = require("fs");
 const xml2js = require("xml2js");
 const { promisify } = require("util");
@@ -16,6 +18,7 @@ interface IDrawIOMXCell {
 interface IDrawIOMXCellProperties {
   id: string;
   style?: string;
+  value?: string;
   parent?: string;
   source?: string;
   target?: string;
@@ -23,8 +26,18 @@ interface IDrawIOMXCellProperties {
   vertex?: string;
 }
 
+interface IReMappedCell {
+  id: number;
+  oldObject: IDrawIOMXCell;
+  type: string;
+  value?: string;
+  source?: number;
+  target?: number;
+}
+
 interface IDrawIOMXGeometryCell {
   $: IDrawIOMXGeometryCellProperties;
+  Array?: any;
 }
 interface IDrawIOMXGeometryCellProperties {
   x?: string;
@@ -42,7 +55,20 @@ export const loadDiagramCells = async (filePath: String): Promise<any[]> => {
 };
 
 const buildFileFromCells = (cells: IDrawIOMXCell[]): String => {
-  console.log(cells);
+  //console.log(cells);
+  const mappedObject = cells.map(
+    (cell: IDrawIOMXCell): IReMappedCell => {
+      return {
+        id: parseInt(cell.$.id),
+        oldObject: cell,
+        type: "thing",
+        value: cell.$.value ? cell.$.value : undefined,
+        source: cell.$.source ? parseInt(cell.$.source) : undefined,
+        target: cell.$.target ? parseInt(cell.$.target) : undefined,
+      };
+    }
+  );
+  //console.log(mappedObject);
   return "blah";
 };
 

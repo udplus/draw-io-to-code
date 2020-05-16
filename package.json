@@ -5,7 +5,9 @@
   "repository": "https://github.com/FraserTooth/draw-io-to-code.git",
   "author": "Fraser Tooth <frasertooth@gmail.com>",
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "xml2js": "^0.4.23"
+  },
   "devDependencies": {
     "@types/chai": "^4.2.11",
     "@types/mocha": "^7.0.2",
@@ -19,6 +21,8 @@
   "scripts": {
     "test": "mocha -r ts-node/register tests/*.spec.ts",
     "prepublish": "tsc",
-    "build": "tsc"
+    "build": "tsc",
+    "prestart": "tsc",
+    "start": "node ./dist/main.js"
   }
 }

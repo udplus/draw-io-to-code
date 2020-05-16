@@ -6,11 +6,9 @@ const readFileAsync = promisify(fs.readFile);
 
 const parser = new xml2js.Parser();
 
-export const loadXML = async (filePath: String) => {
+export const loadDiagramCells = async (filePath: String): Promise<any[]> => {
   const res = await readFileAsync(filePath);
-  console.log("File Loaded");
-  parser.parseString(res, function (err: any, result: any) {
-    console.dir(result.mxfile.diagram[0].mxGraphModel[0].root[0].mxCell);
-    console.log("Done");
-  });
+  console.log("--- File Loaded --- 🥘");
+  const xmlObject = await parser.parseStringPromise(res);
+  return xmlObject.mxfile.diagram[0].mxGraphModel[0].root[0].mxCell;
 };

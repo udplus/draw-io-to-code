@@ -1,0 +1,24 @@
+{
+  "name": "draw-io-to-code",
+  "version": "0.0.1",
+  "main": "dist/src/main.js",
+  "repository": "https://github.com/FraserTooth/draw-io-to-code.git",
+  "author": "Fraser Tooth <frasertooth@gmail.com>",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "@types/chai": "^4.2.11",
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^14.0.1",
+    "chai": "^4.2.0",
+    "eslint": "^7.0.0",
+    "mocha": "^7.1.2",
+    "ts-node": "^8.10.1",
+    "typescript": "^3.9.2"
+  },
+  "scripts": {
+    "test": "mocha -r ts-node/register tests/*.spec.ts",
+    "prepublish": "tsc",
+    "build": "tsc"
+  }
+}

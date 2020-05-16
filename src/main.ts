@@ -14,5 +14,3 @@ export const loadXML = async (filePath: String) => {
     console.log("Done");
   });
 };
-
-loadXML("test_diagrams/simpleConsoleLogFunction.drawio");

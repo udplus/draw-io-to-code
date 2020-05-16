@@ -12,3 +12,10 @@ export const loadDiagramCells = async (filePath: String): Promise<any[]> => {
   const xmlObject = await parser.parseStringPromise(res);
   return xmlObject.mxfile.diagram[0].mxGraphModel[0].root[0].mxCell;
 };
+
+export const generateFunctionFromDiagram = async (
+  filePath: String
+): Promise<any> => {
+  const cells = await loadDiagramCells(filePath);
+  return Promise.all([cells]);
+};

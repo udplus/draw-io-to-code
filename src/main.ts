@@ -26,6 +26,11 @@ interface IDrawIOMXCellProperties {
   edge?: string;
 }
 
+interface IDrawIOStyles {
+  shape: string;
+  [style: string]: string;
+}
+
 interface INode {
   id: number;
   oldObject: IDrawIOMXCell;
@@ -53,13 +58,37 @@ interface IDrawIOMXGeometryCellProperties {
   as: string;
 }
 
+interface ITypeKeywordMap {
+  [type: string]: string[];
+}
+
 export const loadDiagramCells = async (filePath: String): Promise<any[]> => {
   const res = await readFileAsync(filePath);
   const xmlObject = await parser.parseStringPromise(res);
   return xmlObject.mxfile.diagram[0].mxGraphModel[0].root[0].mxCell;
 };
 
+const typeDecider = (shape: string): string => {
+  const typeKeywordMap: ITypeKeywordMap = {
+    input: ["start"],
+    output: ["terminator"],
+  };
+
+  for (const type in typeKeywordMap) {
+    const keywords = typeKeywordMap[type];
+
+    for (const keyword of keywords) {
+      if (shape.includes(keyword)) {
+        return type;
+      }
+    }
+  }
+  return "unknown";
+};
+
 const buildFileFromCells = (cells: IDrawIOMXCell[]): String => {
+  console.log(cells);
+
   const edges: IEdge[] = [];
   const nodes: INode[] = [];
 
@@ -67,17 +96,28 @@ const buildFileFromCells = (cells: IDrawIOMXCell[]): String => {
     const props = cell.$;
 
     if (props.edge === "1") {
+      //If Edge
       edges.push({
         id: parseInt(props.id),
         oldObject: cell,
-        source: parseInt(props.source ? props.source : "") ?? undefined,
-        target: parseInt(props.target ? props.target : "") ?? undefined,
+        source: parseInt(props.source ? props.source : ""),
+        target: parseInt(props.target ? props.target : ""),
       });
-    } else if (props.vertex === "1") {
+    } else if (props.vertex === "1" && props.style) {
+      //IF Vertex
+      const stylePairs: any[] = props.style
+        ?.slice(0, -1)
+        .split(";")
+        .map((style) => {
+          return style.split("=");
+        });
+
+      const shape = stylePairs.find((pair) => pair[0] == "shape")[1];
+
       nodes.push({
         id: parseInt(props.id),
         oldObject: cell,
-        type: "thing",
+        type: typeDecider(shape),
         value: props.value ? props.value : "",
       });
     }

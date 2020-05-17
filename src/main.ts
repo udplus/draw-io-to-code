@@ -86,11 +86,16 @@ const typeDecider = (shape: string): string => {
   return "unknown";
 };
 
-const buildFileFromCells = (cells: IDrawIOMXCell[]): String => {
+const buildFileFromCells = (
+  cells: IDrawIOMXCell[],
+  fileName: string
+): String => {
   console.log(cells);
 
   const edges: IEdge[] = [];
   const nodes: INode[] = [];
+  const inputs: INode[] = [];
+  let output: INode | undefined;
 
   cells.forEach((cell: IDrawIOMXCell) => {
     const props = cell.$;
@@ -114,18 +119,39 @@ const buildFileFromCells = (cells: IDrawIOMXCell[]): String => {
 
       const shape = stylePairs.find((pair) => pair[0] == "shape")[1];
 
-      nodes.push({
+      const node = {
         id: parseInt(props.id),
         oldObject: cell,
         type: typeDecider(shape),
         value: props.value ? props.value : "",
-      });
+      };
+
+      if (node.type === "input") {
+        inputs.push(node);
+      } else if (node.type === "output") {
+        output = node;
+      } else {
+        nodes.push(node);
+      }
     }
   });
 
   console.log(edges);
   console.log(nodes);
-  return "blah";
+  console.log(inputs);
+  console.log(output);
+
+  //Build Input
+  const inputValues = inputs
+    .map((inputNode) => {
+      return inputNode.value;
+    })
+    .join(",");
+  const functionStringStart = `function ${fileName}(${inputValues}) {\n`;
+
+  const functionStringEnd = output ? `  return ${output.value};\n}\n` : `}\n`;
+
+  return functionStringStart + functionStringEnd;
 };
 
 export const generateFunctionFromDiagram = async (
@@ -133,11 +159,13 @@ export const generateFunctionFromDiagram = async (
 ): Promise<any> => {
   const cells = await loadDiagramCells(filePath);
 
+  const fileName = filePath.split("/")[1].split(".")[0];
+
   //Write To File
-  const writeFilePath = "dist/" + filePath.split("/")[1].split(".")[0] + ".js";
+  const writeFilePath = "dist/" + fileName + ".js";
   const writtenFile = await writeFileAsync(
     writeFilePath,
-    buildFileFromCells(cells)
+    buildFileFromCells(cells, fileName)
   );
   return Promise.all([writtenFile]);
 };

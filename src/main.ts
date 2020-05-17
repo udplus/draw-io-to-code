@@ -90,7 +90,7 @@ const buildFileFromCells = (
   cells: IDrawIOMXCell[],
   fileName: string
 ): String => {
-  console.log(cells);
+  // console.log(cells);
 
   const edges: IEdge[] = [];
   const nodes: INode[] = [];
@@ -136,10 +136,10 @@ const buildFileFromCells = (
     }
   });
 
-  console.log(edges);
-  console.log(nodes);
-  console.log(inputs);
-  console.log(output);
+  // console.log(edges);
+  // console.log(nodes);
+  // console.log(inputs);
+  // console.log(output);
 
   //Build Input
   const inputValues = inputs
@@ -149,7 +149,10 @@ const buildFileFromCells = (
     .join(",");
   const functionStringStart = `function ${fileName}(${inputValues}) {\n`;
 
+  //Build Output
   const functionStringEnd = output ? `  return ${output.value};\n}\n` : `}\n`;
+
+  //Build Middle Items
 
   return functionStringStart + functionStringEnd;
 };

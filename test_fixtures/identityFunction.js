@@ -1,3 +1,3 @@
-function identityFunction(input) {
-  return input;
+function identityFunction(input1) {
+  return input1;
 }

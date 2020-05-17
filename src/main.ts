@@ -1,8 +1,8 @@
-import { stringify } from "querystring";
-
 const fs = require("fs");
 const xml2js = require("xml2js");
 const { promisify } = require("util");
+
+import { logger, adder, ifStatement } from "./nodeFunctionBuilders";
 
 const readFileAsync = promisify(fs.readFile);
 const writeFileAsync = promisify(fs.writeFile);
@@ -72,6 +72,7 @@ const typeDecider = (shape: string): string => {
   const typeKeywordMap: ITypeKeywordMap = {
     input: ["start"],
     output: ["terminator"],
+    logger: ["display"],
   };
 
   for (const type in typeKeywordMap) {
@@ -96,7 +97,9 @@ const buildFileFromCells = (
   const nodes: INode[] = [];
   const inputs: INode[] = [];
   let output: INode | undefined;
+  const ids: any = {};
 
+  //Arrange Cell Types
   cells.forEach((cell: IDrawIOMXCell) => {
     const props = cell.$;
 
@@ -127,10 +130,14 @@ const buildFileFromCells = (
       };
 
       if (node.type === "input") {
+        node.value = "input" + (inputs.length + 1).toString();
+        ids[node.id] = node;
         inputs.push(node);
       } else if (node.type === "output") {
+        ids[node.id] = node;
         output = node;
       } else {
+        ids[node.id] = node;
         nodes.push(node);
       }
     }
@@ -150,11 +157,31 @@ const buildFileFromCells = (
   const functionStringStart = `function ${fileName}(${inputValues}) {\n`;
 
   //Build Output
-  const functionStringEnd = output ? `  return ${output.value};\n}\n` : `}\n`;
+  let nodeConnectingToOutput = { value: "" };
+  edges.forEach((edge) => {
+    if (edge.target === output?.id) {
+      nodeConnectingToOutput = ids[edge.source];
+    }
+  });
+
+  const functionStringEnd = output
+    ? `  return ${nodeConnectingToOutput.value};\n}\n`
+    : `}\n`;
 
   //Build Middle Items
+  let functionStringMiddle = "";
+  nodes.forEach((node) => {
+    let nodeConnectingToNode = { value: "" };
+    edges.forEach((edge) => {
+      if (edge.target === node.id) {
+        nodeConnectingToNode = ids[edge.source];
+      }
+    });
 
-  return functionStringStart + functionStringEnd;
+    functionStringMiddle += "  " + logger(nodeConnectingToNode.value);
+  });
+
+  return functionStringStart + functionStringMiddle + functionStringEnd;
 };
 
 export const generateFunctionFromDiagram = async (

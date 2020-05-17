@@ -22,17 +22,22 @@ interface IDrawIOMXCellProperties {
   parent?: string;
   source?: string;
   target?: string;
-  edge?: string;
   vertex?: string;
+  edge?: string;
 }
 
-interface IReMappedCell {
+interface INode {
   id: number;
   oldObject: IDrawIOMXCell;
   type: string;
-  value?: string;
-  source?: number;
-  target?: number;
+  value: string;
+}
+
+interface IEdge {
+  id: number;
+  oldObject: IDrawIOMXCell;
+  source: number;
+  target: number;
 }
 
 interface IDrawIOMXGeometryCell {
@@ -55,20 +60,31 @@ export const loadDiagramCells = async (filePath: String): Promise<any[]> => {
 };
 
 const buildFileFromCells = (cells: IDrawIOMXCell[]): String => {
-  //console.log(cells);
-  const mappedObject = cells.map(
-    (cell: IDrawIOMXCell): IReMappedCell => {
-      return {
-        id: parseInt(cell.$.id),
+  const edges: IEdge[] = [];
+  const nodes: INode[] = [];
+
+  cells.forEach((cell: IDrawIOMXCell) => {
+    const props = cell.$;
+
+    if (props.edge === "1") {
+      edges.push({
+        id: parseInt(props.id),
+        oldObject: cell,
+        source: parseInt(props.source ? props.source : "") ?? undefined,
+        target: parseInt(props.target ? props.target : "") ?? undefined,
+      });
+    } else if (props.vertex === "1") {
+      nodes.push({
+        id: parseInt(props.id),
         oldObject: cell,
         type: "thing",
-        value: cell.$.value ? cell.$.value : undefined,
-        source: cell.$.source ? parseInt(cell.$.source) : undefined,
-        target: cell.$.target ? parseInt(cell.$.target) : undefined,
-      };
+        value: props.value ? props.value : "",
+      });
     }
-  );
-  //console.log(mappedObject);
+  });
+
+  console.log(edges);
+  console.log(nodes);
   return "blah";
 };
 

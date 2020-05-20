@@ -13,7 +13,11 @@ const readFileAsync = promisify(fs.readFile);
 
 chai.use(deepEqualInAnyOrder);
 
-const testFixtures = ["identityFunction", "simpleConsoleLogFunction"];
+const testFixtures = [
+  "identityFunction",
+  "simpleConsoleLogFunction",
+  "ifStatement",
+];
 
 describe("Import DrawIO Files", () => {
   it("Imports the DrawIO File as an Object Without Crashing", async () => {

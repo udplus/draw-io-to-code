@@ -2,7 +2,7 @@ const fs = require("fs");
 const xml2js = require("xml2js");
 const { promisify } = require("util");
 
-import { logger, adder, ifStatement } from "./nodeFunctionBuilders";
+import { start, end, builders } from "./nodeFunctionBuilders";
 
 const readFileAsync = promisify(fs.readFile);
 const writeFileAsync = promisify(fs.writeFile);
@@ -31,11 +31,19 @@ interface IDrawIOStyles {
   [style: string]: string;
 }
 
+type INodeTypes =
+  | "input"
+  | "output"
+  | "logger"
+  | "adder"
+  | "ifStatement"
+  | "unknown";
 interface INode {
   id: number;
   oldObject: IDrawIOMXCell;
-  type: string;
+  type: INodeTypes;
   value: string;
+  generator: any;
 }
 
 interface IEdge {
@@ -68,7 +76,7 @@ export const loadDiagramCells = async (filePath: String): Promise<any[]> => {
   return xmlObject.mxfile.diagram[0].mxGraphModel[0].root[0].mxCell;
 };
 
-const typeDecider = (shape: string): string => {
+const typeDecider = (shape: string): INodeTypes => {
   const typeKeywordMap: ITypeKeywordMap = {
     input: ["start"],
     output: ["terminator"],
@@ -80,7 +88,10 @@ const typeDecider = (shape: string): string => {
 
     for (const keyword of keywords) {
       if (shape.includes(keyword)) {
-        return type;
+        if (type === "input") return "input";
+        if (type === "output") return "output";
+        if (type === "logger") return "logger";
+        if (type === "adder") return "adder";
       }
     }
   }
@@ -122,31 +133,28 @@ const buildFileFromCells = (
 
       const shape = stylePairs.find((pair) => pair[0] == "shape")[1];
 
-      const node = {
+      const node: INode = {
         id: parseInt(props.id),
         oldObject: cell,
         type: typeDecider(shape),
         value: props.value ? props.value : "",
+        generator: () => {},
       };
 
       if (node.type === "input") {
+        node.generator = start;
         node.value = "input" + (inputs.length + 1).toString();
-        ids[node.id] = node;
         inputs.push(node);
       } else if (node.type === "output") {
-        ids[node.id] = node;
+        node.generator = end;
         output = node;
       } else {
-        ids[node.id] = node;
+        node.generator = builders[node.type];
         nodes.push(node);
       }
+      ids[node.id] = node;
     }
   });
-
-  // console.log(edges);
-  // console.log(nodes);
-  // console.log(inputs);
-  // console.log(output);
 
   //Build Input
   const inputValues = inputs
@@ -154,7 +162,7 @@ const buildFileFromCells = (
       return inputNode.value;
     })
     .join(",");
-  const functionStringStart = `function ${fileName}(${inputValues}) {\n`;
+  const functionStringStart = inputs[0].generator(fileName, inputValues);
 
   //Build Output
   let nodeConnectingToOutput = { value: "" };
@@ -164,10 +172,7 @@ const buildFileFromCells = (
     }
   });
 
-  const functionStringEnd = output
-    ? `  return ${nodeConnectingToOutput.value};\n}\n`
-    : `}\n`;
-
+  const functionStringEnd = output?.generator(nodeConnectingToOutput.value);
   //Build Middle Items
   let functionStringMiddle = "";
   nodes.forEach((node) => {
@@ -177,8 +182,7 @@ const buildFileFromCells = (
         nodeConnectingToNode = ids[edge.source];
       }
     });
-
-    functionStringMiddle += "  " + logger(nodeConnectingToNode.value);
+    functionStringMiddle += "  " + node.generator(nodeConnectingToNode.value);
   });
 
   return functionStringStart + functionStringMiddle + functionStringEnd;

@@ -36,7 +36,7 @@ type INodeTypes =
   | "output"
   | "logger"
   | "adder"
-  | "ifStatement"
+  | "decision"
   | "unknown";
 interface INode {
   id: number;
@@ -81,6 +81,7 @@ const typeDecider = (shape: string): INodeTypes => {
     input: ["start"],
     output: ["terminator"],
     logger: ["display"],
+    decision: ["decision"],
   };
 
   for (const type in typeKeywordMap) {
@@ -92,6 +93,7 @@ const typeDecider = (shape: string): INodeTypes => {
         if (type === "output") return "output";
         if (type === "logger") return "logger";
         if (type === "adder") return "adder";
+        if (type === "decision") return "decision";
       }
     }
   }

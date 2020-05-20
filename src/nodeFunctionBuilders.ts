@@ -16,7 +16,7 @@ const adder = (resultName: string, a: string, b: string): string => {
   return `const ${resultName} = ${a} + ${b};`;
 };
 
-const ifStatement = (
+const decision = (
   resultName: string,
   test: string,
   a: string,
@@ -30,6 +30,6 @@ const unknown = (): string => "";
 export const builders = {
   logger,
   adder,
-  ifStatement,
+  decision,
   unknown,
 };

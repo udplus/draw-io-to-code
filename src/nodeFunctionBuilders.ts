@@ -10,8 +10,12 @@ export const end = (nodeConnectingToOutput: string | undefined): string => {
     : `}\n`;
 };
 
-const logger = (whatToLog: string): string => {
-  return `console.log(${whatToLog});\n`;
+const logger = (
+  node: INode | undefined,
+  nodesConnectingToNode: INode[],
+  edgesConnectingToNode: IEdge[] | undefined
+): string => {
+  return `console.log(${nodesConnectingToNode[0].value});\n`;
 };
 
 const adder = (resultName: string, a: string, b: string): string => {
@@ -19,21 +23,34 @@ const adder = (resultName: string, a: string, b: string): string => {
 };
 
 const decision = (
+  node: INode,
   nodesConnectingToNode: INode[],
   edgesConnectingToNode: IEdge[]
 ): string => {
-  console.log(edgesConnectingToNode);
-  const inputs = {};
-  nodesConnectingToNode.forEach((node: INode): void => {
-    // console.log(node.oldObject.$.style);
-  });
+  let trueCondition = "false";
+  let falseCondition = "false";
+  let test = "false";
 
   edgesConnectingToNode.forEach((edge: IEdge): void => {
-    const styleString = edge.oldObject.$.style;
-    console.log();
+    let x = edge.styles.find((pair) => pair[0] == "entryX")[1];
+
+    nodesConnectingToNode.forEach((node: INode): void => {
+      if (edge.source === node.id) {
+        // "0.5": "test",
+        // "0": "trueCondition",
+        // "1": "falseCondition",
+        if (x === "0.5") {
+          test = node.value;
+        } else if (x === "0") {
+          trueCondition = node.value;
+        } else if (x === "1") {
+          falseCondition = node.value;
+        }
+      }
+    });
   });
 
-  return `const decision1 = ${test} ? a : b;`;
+  return `const ${node.value} = ${test} ? ${trueCondition} : ${falseCondition};\n`;
 };
 
 const unknown = (): string => "";

@@ -66,6 +66,7 @@ const buildFileFromCells = (
   const inputs: INode[] = [];
   let output: INode | undefined;
   const ids: any = {};
+  const typesCount: any = {};
 
   //Arrange Cell Types
   cells.forEach((cell: IDrawIOMXCell) => {
@@ -87,11 +88,18 @@ const buildFileFromCells = (
         (pair) => pair[0] == "shape"
       )[1];
 
+      const type = typeDecider(shape);
+      if (typesCount[type]) {
+        typesCount[type]++;
+      } else {
+        typesCount[type] = 1;
+      }
+
       const node: INode = {
         id: parseInt(props.id),
         oldObject: cell,
-        type: typeDecider(shape),
-        value: props.value ? props.value : "",
+        type,
+        value: props.value ? props.value : `${type}${typesCount[type]}`,
         generator: () => {},
       };
 
@@ -139,7 +147,7 @@ const buildFileFromCells = (
       }
     });
     functionStringMiddle +=
-      "  " + node.generator(nodesConnectingToNode, edgesConnectingToNode);
+      "  " + node.generator(node, nodesConnectingToNode, edgesConnectingToNode);
   });
 
   // console.log(cells);

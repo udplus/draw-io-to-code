@@ -17,6 +17,7 @@ const testFixtures = [
   "identityFunction",
   "simpleConsoleLogFunction",
   "ifStatement",
+  "adderTest",
 ];
 
 describe("Import DrawIO Files", () => {

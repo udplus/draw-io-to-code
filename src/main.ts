@@ -118,7 +118,7 @@ const buildFileFromCells = (
     .map((inputNode) => {
       return inputNode.value;
     })
-    .join(",");
+    .join(", ");
   const functionStringStart = inputs[0].generator(fileName, inputValues);
 
   //Build Output

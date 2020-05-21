@@ -1,4 +1,4 @@
-import { INode } from "./commonInterfaces";
+import { INode, IEdge } from "./commonInterfaces";
 
 export const start = (fileName: string, inputValues: string): string => {
   return `function ${fileName}(${inputValues}) {\n`;
@@ -18,8 +18,21 @@ const adder = (resultName: string, a: string, b: string): string => {
   return `const ${resultName} = ${a} + ${b};`;
 };
 
-const decision = (nodesConnectingToNode: INode[]): string => {
-  console.log(nodesConnectingToNode);
+const decision = (
+  nodesConnectingToNode: INode[],
+  edgesConnectingToNode: IEdge[]
+): string => {
+  console.log(edgesConnectingToNode);
+  const inputs = {};
+  nodesConnectingToNode.forEach((node: INode): void => {
+    // console.log(node.oldObject.$.style);
+  });
+
+  edgesConnectingToNode.forEach((edge: IEdge): void => {
+    const styleString = edge.oldObject.$.style;
+    console.log();
+  });
+
   return `const decision1 = ${test} ? a : b;`;
 };
 

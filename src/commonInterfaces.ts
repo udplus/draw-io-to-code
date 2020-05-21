@@ -19,6 +19,7 @@ export interface IEdge {
   oldObject: IDrawIOMXCell;
   source: number;
   target: number;
+  styles: any[];
 }
 
 //DRAW IO Stuff

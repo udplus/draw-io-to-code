@@ -45,6 +45,16 @@ const typeDecider = (shape: string): INodeTypes => {
   return "unknown";
 };
 
+const getStylePairs = (styleString: string | undefined): any[] => {
+  if (styleString === undefined) return [];
+  return styleString
+    ?.slice(0, -1)
+    .split(";")
+    .map((style) => {
+      return style.split("=");
+    });
+};
+
 const buildFileFromCells = (
   cells: IDrawIOMXCell[],
   fileName: string
@@ -68,17 +78,14 @@ const buildFileFromCells = (
         oldObject: cell,
         source: parseInt(props.source ? props.source : ""),
         target: parseInt(props.target ? props.target : ""),
+        styles: getStylePairs(props.style),
       });
     } else if (props.vertex === "1" && props.style) {
       //IF Vertex
-      const stylePairs: any[] = props.style
-        ?.slice(0, -1)
-        .split(";")
-        .map((style) => {
-          return style.split("=");
-        });
 
-      const shape = stylePairs.find((pair) => pair[0] == "shape")[1];
+      const shape = getStylePairs(props.style).find(
+        (pair) => pair[0] == "shape"
+      )[1];
 
       const node: INode = {
         id: parseInt(props.id),
@@ -124,16 +131,19 @@ const buildFileFromCells = (
   let functionStringMiddle = "";
   nodes.forEach((node) => {
     let nodesConnectingToNode: INode[] = [];
+    let edgesConnectingToNode: IEdge[] = [];
     edges.forEach((edge) => {
       if (edge.target === node.id) {
         nodesConnectingToNode.push(ids[edge.source]);
+        edgesConnectingToNode.push(edge);
       }
     });
-    functionStringMiddle += "  " + node.generator(nodesConnectingToNode);
+    functionStringMiddle +=
+      "  " + node.generator(nodesConnectingToNode, edgesConnectingToNode);
   });
 
-  console.log(cells);
-  console.log(edges);
+  // console.log(cells);
+  // console.log(edges);
 
   return functionStringStart + functionStringMiddle + functionStringEnd;
 };

@@ -18,8 +18,31 @@ const logger = (
   return `console.log(${nodesConnectingToNode[0].value});\n`;
 };
 
-const adder = (resultName: string, a: string, b: string): string => {
-  return `const ${resultName} = ${a} + ${b};`;
+const adder = (
+  node: INode,
+  nodesConnectingToNode: INode[],
+  edgesConnectingToNode: IEdge[]
+): string => {
+  let left = "false";
+  let right = "false";
+
+  edgesConnectingToNode.forEach((edge: IEdge): void => {
+    let x = edge.styles.find((pair) => pair[0] == "entryX")[1];
+
+    nodesConnectingToNode.forEach((node: INode): void => {
+      if (edge.source === node.id) {
+        // "0": "left",
+        // "1": "right",
+        if (x === "0") {
+          left = node.value;
+        } else if (x === "1") {
+          right = node.value;
+        }
+      }
+    });
+  });
+
+  return `const ${node.value} = ${left} + ${right};\n`;
 };
 
 const decision = (

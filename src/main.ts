@@ -27,6 +27,7 @@ const typeDecider = (shape: string): INodeTypes => {
     output: ["terminator"],
     logger: ["display"],
     decision: ["decision"],
+    adder: ["flowchart.summing_function"],
   };
 
   for (const type in typeKeywordMap) {

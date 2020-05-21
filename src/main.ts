@@ -4,67 +4,12 @@ const { promisify } = require("util");
 
 import { start, end, builders } from "./nodeFunctionBuilders";
 
+import { INodeTypes, INode, IEdge, IDrawIOMXCell } from "./commonInterfaces";
+
 const readFileAsync = promisify(fs.readFile);
 const writeFileAsync = promisify(fs.writeFile);
 
 const parser = new xml2js.Parser();
-
-interface IDrawIOMXCell {
-  $: IDrawIOMXCellProperties; //Properties of the Cell
-  mxGeometry?: IDrawIOMXGeometryCell; //Child
-}
-
-//Highly Dependant on which cell is present
-interface IDrawIOMXCellProperties {
-  id: string;
-  style?: string;
-  value?: string;
-  parent?: string;
-  source?: string;
-  target?: string;
-  vertex?: string;
-  edge?: string;
-}
-
-interface IDrawIOStyles {
-  shape: string;
-  [style: string]: string;
-}
-
-type INodeTypes =
-  | "input"
-  | "output"
-  | "logger"
-  | "adder"
-  | "decision"
-  | "unknown";
-interface INode {
-  id: number;
-  oldObject: IDrawIOMXCell;
-  type: INodeTypes;
-  value: string;
-  generator: any;
-}
-
-interface IEdge {
-  id: number;
-  oldObject: IDrawIOMXCell;
-  source: number;
-  target: number;
-}
-
-interface IDrawIOMXGeometryCell {
-  $: IDrawIOMXGeometryCellProperties;
-  Array?: any;
-}
-interface IDrawIOMXGeometryCellProperties {
-  x?: string;
-  y?: string;
-  width?: string;
-  height?: string;
-  relative?: string;
-  as: string;
-}
 
 interface ITypeKeywordMap {
   [type: string]: string[];
@@ -173,19 +118,22 @@ const buildFileFromCells = (
       nodeConnectingToOutput = ids[edge.source];
     }
   });
-
   const functionStringEnd = output?.generator(nodeConnectingToOutput.value);
+
   //Build Middle Items
   let functionStringMiddle = "";
   nodes.forEach((node) => {
-    let nodeConnectingToNode = { value: "" };
+    let nodesConnectingToNode: INode[] = [];
     edges.forEach((edge) => {
       if (edge.target === node.id) {
-        nodeConnectingToNode = ids[edge.source];
+        nodesConnectingToNode.push(ids[edge.source]);
       }
     });
-    functionStringMiddle += "  " + node.generator(nodeConnectingToNode.value);
+    functionStringMiddle += "  " + node.generator(nodesConnectingToNode);
   });
+
+  console.log(cells);
+  console.log(edges);
 
   return functionStringStart + functionStringMiddle + functionStringEnd;
 };

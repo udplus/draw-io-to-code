@@ -1,3 +1,5 @@
+import { INode } from "./commonInterfaces";
+
 export const start = (fileName: string, inputValues: string): string => {
   return `function ${fileName}(${inputValues}) {\n`;
 };
@@ -16,13 +18,9 @@ const adder = (resultName: string, a: string, b: string): string => {
   return `const ${resultName} = ${a} + ${b};`;
 };
 
-const decision = (
-  resultName: string,
-  test: string,
-  a: string,
-  b: string
-): string => {
-  return `const ${resultName} = ${test} ? ${a} : ${b};`;
+const decision = (nodesConnectingToNode: INode[]): string => {
+  console.log(nodesConnectingToNode);
+  return `const decision1 = ${test} ? a : b;`;
 };
 
 const unknown = (): string => "";

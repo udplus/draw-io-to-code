@@ -89,23 +89,18 @@ const buildFileFromCells = (
       )[1];
 
       const type = typeDecider(shape);
-      if (typesCount[type]) {
-        typesCount[type]++;
-      } else {
-        typesCount[type] = 1;
-      }
+      const id = parseInt(props.id);
 
       const node: INode = {
-        id: parseInt(props.id),
+        id,
         oldObject: cell,
         type,
-        value: props.value ? props.value : `${type}${typesCount[type]}`,
+        value: props.value ? props.value : `${type}${id}`,
         generator: () => {},
       };
 
       if (node.type === "input") {
         node.generator = start;
-        node.value = "input" + (inputs.length + 1).toString();
         inputs.push(node);
       } else if (node.type === "output") {
         node.generator = end;

@@ -1,4 +1,4 @@
-function simpleConsoleLogFunction(input1) {
-  console.log(input1);
-  return input1;
+function simpleConsoleLogFunction(input3) {
+  console.log(input3);
+  return input3;
 }
